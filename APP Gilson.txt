@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FotoApp - Impressão de Fotos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .photo-preview {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150"><rect width="200" height="150" fill="%23f3f4f6"/><text x="100" y="75" text-anchor="middle" fill="%236b7280" font-family="Arial" font-size="14">Foto</text></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-6 max-w-md">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-bold text-white mb-2 drop-shadow-lg">📸 FotoApp</h1>
+            <p class="text-purple-100 text-lg">Imprima suas fotos com qualidade profissional</p>
+        </div>
+
+        <!-- Tela de Login/Cadastro -->
+        <div id="loginScreen" class="bg-white rounded-3xl shadow-2xl p-6 mb-6 card-shadow">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Faça seu cadastro</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nome completo</label>
+                    <input type="text" id="userName" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="Seu nome completo">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                    <input type="email" id="userEmail" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="seu@email.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Endereço completo</label>
+                    <textarea id="userAddress" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 h-24 transition-all" placeholder="Rua, número, bairro, cidade, CEP"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Telefone</label>
+                    <input type="tel" id="userPhone" class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="(11) 99999-9999">
+                </div>
+                
+                <button onclick="completeRegistration()" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg">
+                    Continuar ✨
+                </button>
+            </div>
+        </div>
+
+        <!-- Tela Principal do App -->
+        <div id="mainApp" class="hidden">
+            <!-- Upload de Fotos -->
+            <div class="bg-white rounded-3xl shadow-2xl p-6 mb-6 card-shadow">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">📤 Enviar Fotos</h2>
+                
+                <div class="border-3 border-dashed border-purple-300 rounded-2xl p-8 text-center mb-4 bg-purple-50">
+                    <input type="file" id="photoInput" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                    <button onclick="document.getElementById('photoInput').click()" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 font-semibold shadow-lg">
+                        📁 Selecionar Fotos
+                    </button>
+                    <p class="text-sm text-purple-600 mt-3 font-medium">Toque para escolher suas fotos</p>
+                </div>
+                
+                <div id="photoPreview" class="grid grid-cols-2 gap-4"></div>
+            </div>
+
+            <!-- Tamanhos e Preços -->
+            <div class="bg-white rounded-3xl shadow-2xl p-6 mb-6 card-shadow">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">📏 Tamanhos Disponíveis</h2>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-4 border-2 border-green-200 rounded-xl bg-green-50">
+                        <div>
+                            <span class="font-bold text-gray-800">10x15 cm</span>
+                            <span class="text-sm text-green-600 block font-medium">R$ 1,50 (acima de 20 fotos)</span>
+                        </div>
+                        <span class="text-green-600 font-bold text-lg">R$ 2,00</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-4 border-2 border-blue-200 rounded-xl bg-blue-50">
+                        <div>
+                            <span class="font-bold text-gray-800">13x18 cm</span>
+                            <span class="text-sm text-blue-600 block font-medium">Médio</span>
+                        </div>
+                        <span class="text-blue-600 font-bold text-lg">R$ 3,00</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-4 border-2 border-purple-200 rounded-xl bg-purple-50">
+                        <div>
+                            <span class="font-bold text-gray-800">15x21 cm</span>
+                            <span class="text-sm text-purple-600 block font-medium">Grande</span>
+                        </div>
+                        <span class="text-purple-600 font-bold text-lg">R$ 5,50</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-4 border-2 border-orange-200 rounded-xl bg-orange-50">
+                        <div>
+                            <span class="font-bold text-gray-800">20x25 cm</span>
+                            <span class="text-sm text-orange-600 block font-medium">Extra Grande</span>
+                        </div>
+                        <span class="text-orange-600 font-bold text-lg">R$ 8,00</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-4 border-2 border-red-200 rounded-xl bg-red-50">
+                        <div>
+                            <span class="font-bold text-gray-800">20x30 cm</span>
+                            <span class="text-sm text-red-600 block font-medium">Poster</span>
+                        </div>
+                        <span class="text-red-600 font-bold text-lg">R$ 12,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carrinho -->
+            <div id="cartSection" class="bg-white rounded-3xl shadow-2xl p-6 mb-6 hidden card-shadow">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">🛒 Seu Pedido</h2>
+                <div id="cartItems" class="space-y-3 mb-4"></div>
+                <div class="border-t-2 border-gray-200 pt-4">
+                    <div class="flex justify-between items-center text-xl font-bold">
+                        <span class="text-gray-800">Total:</span>
+                        <span id="totalPrice" class="text-green-600 text-2xl">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagamento -->
+            <div id="paymentSection" class="bg-white rounded-3xl shadow-2xl p-6 mb-6 hidden card-shadow">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">💳 Forma de Pagamento</h2>
+                
+                <div class="space-y-4">
+                    <button onclick="selectPayment('pix')" id="pixBtn" class="w-full p-5 border-3 rounded-2xl text-left hover:border-green-500 transition-all transform hover:scale-105 bg-gradient-to-r from-green-50 to-emerald-50">
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-4">📱</span>
+                            <div>
+                                <div class="font-bold text-lg text-gray-800">PIX</div>
+                                <div class="text-sm text-green-600 font-medium">Pagamento instantâneo</div>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="selectPayment('delivery')" id="deliveryBtn" class="w-full p-5 border-3 rounded-2xl text-left hover:border-blue-500 transition-all transform hover:scale-105 bg-gradient-to-r from-blue-50 to-cyan-50">
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-4">🚚</span>
+                            <div>
+                                <div class="font-bold text-lg text-gray-800">Pagamento na Entrega</div>
+                                <div class="text-sm text-blue-600 font-medium">Pague quando receber</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+                
+                <button onclick="processOrder()" id="processBtn" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 mt-6 hidden shadow-lg">
+                    Finalizar Pedido 🎉
+                </button>
+            </div>
+
+            <!-- PIX Payment Modal -->
+            <div id="pixModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center p-4">
+                <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl">
+                    <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">Pagamento PIX</h3>
+                    
+                    <div class="text-center mb-6">
+                        <div class="bg-gradient-to-br from-green-100 to-emerald-100 p-6 rounded-2xl mb-4">
+                            <div class="text-7xl mb-3">📱</div>
+                            <p class="text-sm text-green-700 font-semibold">QR Code do PIX</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-2xl mb-4 border-2 border-blue-200">
+                            <p class="text-xs text-gray-600 mb-2 font-semibold">Chave PIX:</p>
+                            <p class="font-mono text-sm break-all text-blue-700 font-bold" id="pixKey">sua-chave-pix@email.com</p>
+                        </div>
+                        
+                        <p class="text-xl font-bold text-green-600 mb-3">Total: <span id="pixTotal" class="text-2xl">R$ 0,00</span></p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <button onclick="confirmPixPayment()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all font-bold transform hover:scale-105">
+                            ✅ Confirmar Pagamento
+                        </button>
+                        <button onclick="closePixModal()" class="w-full bg-gradient-to-r from-gray-400 to-gray-500 text-white py-3 rounded-xl hover:from-gray-500 hover:to-gray-600 transition-all font-bold transform hover:scale-105">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedPhotos = [];
+        let cart = [];
+        let selectedPayment = '';
+        let userInfo = {};
+
+        const photoSizes = {
+            '10x15': { name: '10x15 cm', price: 2.00, bulkPrice: 1.50 },
+            '13x18': { name: '13x18 cm', price: 3.00 },
+            '15x21': { name: '15x21 cm', price: 5.50 },
+            '20x25': { name: '20x25 cm', price: 8.00 },
+            '20x30': { name: '20x30 cm', price: 12.00 }
+        };
+
+        function completeRegistration() {
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const address = document.getElementById('userAddress').value;
+            const phone = document.getElementById('userPhone').value;
+
+            if (!name || !email || !address || !phone) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            userInfo = { name, email, address, phone };
+            
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        function handlePhotoUpload(event) {
+            const files = Array.from(event.target.files);
+            
+            files.forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const photo = {
+                            id: Date.now() + index,
+                            name: file.name,
+                            dataUrl: e.target.result,
+                            size: '10x15',
+                            price: photoSizes['10x15'].price
+                        };
+                        uploadedPhotos.push(photo);
+                        renderPhotoPreview();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function renderPhotoPreview() {
+            const container = document.getElementById('photoPreview');
+            container.innerHTML = '';
+
+            uploadedPhotos.forEach(photo => {
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'bg-white rounded-2xl p-4 shadow-lg border-2 border-purple-100';
+                photoDiv.innerHTML = `
+                    <div class="aspect-square rounded-xl mb-3 overflow-hidden bg-gray-100 border-2 border-gray-200">
+                        <img src="${photo.dataUrl}" alt="${photo.name}" class="w-full h-full object-cover">
+                    </div>
+                    <p class="text-xs text-gray-600 mb-3 truncate font-medium" title="${photo.name}">${photo.name}</p>
+                    <select onchange="updatePhotoSize(${photo.id}, this.value)" class="w-full text-xs p-2 border-2 border-purple-200 rounded-lg mb-3 font-medium">
+                        <option value="10x15" ${photo.size === '10x15' ? 'selected' : ''}>10x15 - R$ 2,00</option>
+                        <option value="13x18" ${photo.size === '13x18' ? 'selected' : ''}>13x18 - R$ 3,00</option>
+                        <option value="15x21" ${photo.size === '15x21' ? 'selected' : ''}>15x21 - R$ 5,50</option>
+                        <option value="20x25" ${photo.size === '20x25' ? 'selected' : ''}>20x25 - R$ 8,00</option>
+                        <option value="20x30" ${photo.size === '20x30' ? 'selected' : ''}>20x30 - R$ 12,00</option>
+                    </select>
+                    <button onclick="addToCart(${photo.id})" class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all font-bold transform hover:scale-105">
+                        Adicionar ao Carrinho
+                    </button>
+                `;
+                container.appendChild(photoDiv);
+            });
+        }
+
+        function updatePhotoSize(photoId, size) {
+            const photo = uploadedPhotos.find(p => p.id === photoId);
+            if (photo) {
+                photo.size = size;
+                photo.price = photoSizes[size].price;
+            }
+        }
+
+        function addToCart(photoId) {
+            const photo = uploadedPhotos.find(p => p.id === photoId);
+            if (photo) {
+                cart.push({...photo});
+                updateCart();
+            }
+        }
+
+        function updateCart() {
+            const cartSection = document.getElementById('cartSection');
+            const cartItems = document.getElementById('cartItems');
+            const totalPrice = document.getElementById('totalPrice');
+            
+            if (cart.length === 0) {
+                cartSection.classList.add('hidden');
+                return;
+            }
+
+            cartSection.classList.remove('hidden');
+            
+            cartItems.innerHTML = '';
+            let total = 0;
+
+            // Count 10x15 photos for bulk discount
+            const photos10x15 = cart.filter(item => item.size === '10x15');
+            const hasBulkDiscount = photos10x15.length >= 20;
+
+            cart.forEach((item, index) => {
+                let itemPrice = item.price;
+                
+                // Apply bulk discount for 10x15 photos
+                if (item.size === '10x15' && hasBulkDiscount) {
+                    itemPrice = photoSizes['10x15'].bulkPrice;
+                }
+                
+                total += itemPrice;
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-purple-50 rounded-xl border-2 border-purple-100';
+                
+                const priceDisplay = item.size === '10x15' && hasBulkDiscount ? 
+                    `<p class="text-sm font-bold">R$ ${itemPrice.toFixed(2)} <span class="text-xs text-green-600 font-semibold">(desconto)</span></p>` :
+                    `<p class="text-sm font-bold">R$ ${itemPrice.toFixed(2)}</p>`;
+                
+                itemDiv.innerHTML = `
+                    <div class="flex-1">
+                        <p class="text-sm font-bold truncate text-gray-800">${item.name}</p>
+                        <p class="text-xs text-purple-600 font-medium">${photoSizes[item.size].name}</p>
+                    </div>
+                    <div class="text-right">
+                        ${priceDisplay}
+                        <button onclick="removeFromCart(${index})" class="text-xs text-red-500 hover:text-red-700 font-semibold">Remover</button>
+                    </div>
+                `;
+                cartItems.appendChild(itemDiv);
+            });
+
+            // Show bulk discount message
+            if (hasBulkDiscount) {
+                const discountDiv = document.createElement('div');
+                discountDiv.className = 'p-4 bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 rounded-xl text-center';
+                discountDiv.innerHTML = `
+                    <p class="text-sm text-green-700 font-bold">🎉 Desconto aplicado! ${photos10x15.length} fotos 10x15 por R$ 1,50 cada</p>
+                `;
+                cartItems.appendChild(discountDiv);
+            }
+
+            totalPrice.textContent = `R$ ${total.toFixed(2)}`;
+            
+            if (cart.length > 0) {
+                document.getElementById('paymentSection').classList.remove('hidden');
+            }
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function selectPayment(type) {
+            selectedPayment = type;
+            
+            // Reset button styles
+            document.getElementById('pixBtn').className = 'w-full p-5 border-3 rounded-2xl text-left hover:border-green-500 transition-all transform hover:scale-105 bg-gradient-to-r from-green-50 to-emerald-50';
+            document.getElementById('deliveryBtn').className = 'w-full p-5 border-3 rounded-2xl text-left hover:border-blue-500 transition-all transform hover:scale-105 bg-gradient-to-r from-blue-50 to-cyan-50';
+            
+            // Highlight selected
+            if (type === 'pix') {
+                document.getElementById('pixBtn').className = 'w-full p-5 border-3 border-green-500 bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl text-left transform scale-105';
+            } else {
+                document.getElementById('deliveryBtn').className = 'w-full p-5 border-3 border-blue-500 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-2xl text-left transform scale-105';
+            }
+            
+            document.getElementById('processBtn').classList.remove('hidden');
+        }
+
+        function processOrder() {
+            if (!selectedPayment) {
+                alert('Selecione uma forma de pagamento!');
+                return;
+            }
+
+            if (cart.length === 0) {
+                alert('Adicione fotos ao seu pedido!');
+                return;
+            }
+
+            if (selectedPayment === 'pix') {
+                showPixModal();
+            } else {
+                confirmOrder();
+            }
+        }
+
+        function showPixModal() {
+            // Calculate total with bulk discount
+            const photos10x15 = cart.filter(item => item.size === '10x15');
+            const hasBulkDiscount = photos10x15.length >= 20;
+            
+            let total = 0;
+            cart.forEach(item => {
+                if (item.size === '10x15' && hasBulkDiscount) {
+                    total += photoSizes['10x15'].bulkPrice;
+                } else {
+                    total += item.price;
+                }
+            });
+            
+            document.getElementById('pixTotal').textContent = `R$ ${total.toFixed(2)}`;
+            document.getElementById('pixModal').classList.remove('hidden');
+            document.getElementById('pixModal').classList.add('flex');
+        }
+
+        function closePixModal() {
+            document.getElementById('pixModal').classList.add('hidden');
+            document.getElementById('pixModal').classList.remove('flex');
+        }
+
+        function confirmPixPayment() {
+            closePixModal();
+            confirmOrder();
+        }
+
+        function confirmOrder() {
+            // Calculate total with bulk discount
+            const photos10x15 = cart.filter(item => item.size === '10x15');
+            const hasBulkDiscount = photos10x15.length >= 20;
+            
+            let total = 0;
+            cart.forEach(item => {
+                if (item.size === '10x15' && hasBulkDiscount) {
+                    total += photoSizes['10x15'].bulkPrice;
+                } else {
+                    total += item.price;
+                }
+            });
+            
+            const paymentMethod = selectedPayment === 'pix' ? 'PIX' : 'Pagamento na Entrega';
+            
+            // Prepare order details for WhatsApp
+            let orderDetails = `🎉 *NOVO PEDIDO FOTOAPP*\n\n`;
+            orderDetails += `👤 *Cliente:* ${userInfo.name}\n`;
+            orderDetails += `📧 *Email:* ${userInfo.email}\n`;
+            orderDetails += `📱 *Telefone:* ${userInfo.phone}\n`;
+            orderDetails += `📍 *Endereço:* ${userInfo.address}\n\n`;
+            orderDetails += `💰 *Total:* R$ ${total.toFixed(2)}\n`;
+            orderDetails += `💳 *Pagamento:* ${paymentMethod}\n`;
+            orderDetails += `📸 *Quantidade de fotos:* ${cart.length}\n\n`;
+            
+            orderDetails += `📋 *DETALHES DO PEDIDO:*\n`;
+            
+            // Group photos by size for better organization
+            const photosBySize = {};
+            cart.forEach(item => {
+                if (!photosBySize[item.size]) {
+                    photosBySize[item.size] = [];
+                }
+                photosBySize[item.size].push(item);
+            });
+            
+            Object.keys(photosBySize).forEach(size => {
+                const photos = photosBySize[size];
+                const sizeInfo = photoSizes[size];
+                let pricePerPhoto = sizeInfo.price;
+                
+                if (size === '10x15' && hasBulkDiscount) {
+                    pricePerPhoto = sizeInfo.bulkPrice;
+                    orderDetails += `• ${photos.length}x ${sizeInfo.name} - R$ ${pricePerPhoto.toFixed(2)} cada (DESCONTO APLICADO)\n`;
+                } else {
+                    orderDetails += `• ${photos.length}x ${sizeInfo.name} - R$ ${pricePerPhoto.toFixed(2)} cada\n`;
+                }
+            });
+            
+            if (hasBulkDiscount) {
+                orderDetails += `\n🎉 *Desconto aplicado:* ${photos10x15.length} fotos 10x15 por R$ 1,50 cada!`;
+            }
+            
+            orderDetails += `\n\n📝 *Obs:* As fotos serão enviadas via WhatsApp após esta mensagem.`;
+            
+            // Send order details to WhatsApp
+            const whatsappNumber = '5535988098403';
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderDetails)}`;
+            
+            alert(`🎉 Pedido confirmado!\n\nTotal: R$ ${total.toFixed(2)}\nPagamento: ${paymentMethod}\nQuantidade de fotos: ${cart.length}\n\nSuas fotos serão entregues em ${userInfo.address}\n\nAgora você será redirecionado para o WhatsApp para enviar os detalhes do pedido e as fotos!\n\nObrigado por escolher o FotoApp!`);
+            
+            // Open WhatsApp with order details
+            window.open(whatsappUrl, '_blank');
+            
+            // Show instructions for sending photos
+            setTimeout(() => {
+                alert(`📱 IMPORTANTE:\n\nApós enviar a mensagem no WhatsApp, envie também as ${cart.length} fotos selecionadas para o número (35) 98809-8403.\n\nAs fotos devem ser enviadas na mesma conversa para que possamos processar seu pedido corretamente.`);
+            }, 2000);
+            
+            // Reset app
+            cart = [];
+            uploadedPhotos = [];
+            selectedPayment = '';
+            updateCart();
+            renderPhotoPreview();
+            document.getElementById('paymentSection').classList.add('hidden');
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9785ad0f168c4568',t:'MTc1NjczOTIzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
